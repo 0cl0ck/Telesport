@@ -1,3 +1,32 @@
-<h2>Olympic games app</h2>
-<hr />
-<p>{{ (olympics$ | async)?.length }} data loaded</p>
+<div class="dashboard">
+  <h1>Olympic Games Analysis</h1>
+  <div class="subtitle-wrapper">
+    <h2 class="subtitle">Medals per Country</h2>
+  </div>
+  <div class="stats">
+    <div class="stat-box">
+      <h3>Number of JOs</h3>
+      <p>{{ numberOfJOs }}</p>
+    </div>
+    <div class="stat-box">
+      <h3>Number of countries</h3>
+      <p>{{ medalsData.length }}</p>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <ngx-charts-pie-chart
+      [view]="view"
+      [scheme]="colorScheme"
+      [results]="medalsData"
+      [gradient]="true"
+      [legend]="false"
+      [labels]="true"
+      [doughnut]="false"
+      (select)="onSelect($event)"
+      [tooltipDisabled]="false"
+      [tooltipText]="getTooltipText"
+    >
+    </ngx-charts-pie-chart>
+  </div>
+</div>
