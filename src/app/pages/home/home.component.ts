@@ -4,6 +4,7 @@ import { map, catchError } from 'rxjs/operators';
 import { Olympic } from 'src/app/core/models/Olympic';
 import { OlympicService } from 'src/app/core/services/olympic.service';
 import { Color, ScaleType } from '@swimlane/ngx-charts';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -22,7 +23,7 @@ export class HomeComponent implements OnInit {
     domain: ['#956065', '#B8CBE7', '#89A1DB', '#793D52', '#9780A1'],
   };
 
-  constructor(private olympicService: OlympicService) {
+  constructor(private olympicService: OlympicService, private router: Router) {
     this.olympics$ = this.olympicService.getOlympics();
   }
 
@@ -48,6 +49,7 @@ export class HomeComponent implements OnInit {
               (sum, p) => sum + p.medalsCount,
               0
             ),
+            id: country.id,
           }));
         }),
         catchError(() => {
@@ -61,8 +63,14 @@ export class HomeComponent implements OnInit {
   }
 
   onSelect(event: any): void {
-    console.log('Item clicked', event);
-    // Ici, on ajoutera la logique pour rediriger vers la page de détails du pays
+    if (event && event.name) {
+      const selectedCountry = this.medalsData.find(
+        (country) => country.name === event.name
+      );
+      if (selectedCountry && selectedCountry.id) {
+        this.router.navigate(['/detail', selectedCountry.id]);
+      }
+    }
   }
   getTooltipText(data: any): string {
     return `
