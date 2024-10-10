@@ -7,9 +7,19 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './pages/home/home.component';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { TotalMedalsPipe } from './core/pipes/total-medals.pipe';
+import { TotalAthletesPipe } from './core/pipes/total-athletes.pipe';
+import { DetailComponent } from './pages/detail/detail.component';
 
 @NgModule({
-  declarations: [AppComponent, HomeComponent, NotFoundComponent],
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    DetailComponent,
+    NotFoundComponent,
+    TotalMedalsPipe,
+    TotalAthletesPipe,
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
