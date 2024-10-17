@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { Olympic } from 'src/app/core/models/Olympic';
@@ -11,11 +11,11 @@ import { Router } from '@angular/router';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   olympics$: Observable<Olympic[] | null>;
   numberOfJOs: number = 0;
   medalsData: any[] = [];
-  view: [number, number] = [innerWidth / 0.95, 400];
+  view: [number, number] = [800, 400];
   colorScheme: Color = {
     name: 'myScheme',
     selectable: true,
@@ -28,6 +28,8 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.updateChartSize();
+    window.addEventListener('resize', this.updateChartSize.bind(this));
     this.olympics$
       .pipe(
         map((olympics) => {
@@ -60,6 +62,17 @@ export class HomeComponent implements OnInit {
       .subscribe((data) => {
         this.medalsData = data;
       });
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('resize', this.updateChartSize.bind(this));
+  }
+
+  private updateChartSize(): void {
+    const chartContainer = document.querySelector('.chart-container');
+    if (chartContainer) {
+      this.view = [chartContainer.clientWidth, 400];
+    }
   }
 
   onSelect(event: any): void {
