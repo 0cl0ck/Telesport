@@ -5,6 +5,9 @@ import { Olympic } from 'src/app/core/models/Olympic';
 import { OlympicService } from 'src/app/core/services/olympic.service';
 import { Color, ScaleType } from '@swimlane/ngx-charts';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { MedalData } from 'src/app/core/models/MedalData';
 
 @Component({
   selector: 'app-home',
@@ -14,7 +17,7 @@ import { Router } from '@angular/router';
 export class HomeComponent implements OnInit, OnDestroy {
   olympics$: Observable<Olympic[] | null>;
   numberOfJOs: number = 0;
-  medalsData: any[] = [];
+  medalsData: MedalData[] = [];
   view: [number, number] = [800, 400];
   colorScheme: Color = {
     name: 'myScheme',
@@ -22,6 +25,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     group: ScaleType.Ordinal,
     domain: ['#956065', '#B8CBE7', '#89A1DB', '#793D52', '#9780A1'],
   };
+  errorMessage: string | null = null;
+
+  private destroy$ = new Subject<void>();
 
   constructor(private olympicService: OlympicService, private router: Router) {
     this.olympics$ = this.olympicService.getOlympics();
@@ -32,11 +38,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     window.addEventListener('resize', this.updateChartSize.bind(this));
     this.olympics$
       .pipe(
+        takeUntil(this.destroy$),
         map((olympics) => {
           if (olympics === null) {
             return [];
           }
-          // Compter le nombre unique de JO
+          // Compte le nombre unique de JO
           const uniqueJOs = new Set<number>();
           olympics.forEach((country) => {
             country.participations.forEach((participation) => {
@@ -54,18 +61,28 @@ export class HomeComponent implements OnInit, OnDestroy {
             id: country.id,
           }));
         }),
-        catchError(() => {
-          console.error('An error occurred while fetching the data');
+        catchError((error) => {
+          console.error('Erreur dans HomeComponent:', error);
+          this.errorMessage =
+            'Une erreur est survenue lors du chargement des données.';
           return of([]);
         })
       )
-      .subscribe((data) => {
-        this.medalsData = data;
+      .subscribe({
+        next: (data) => {
+          this.medalsData = data;
+        },
+        error: (error) => {
+          console.error('Erreur de souscription:', error);
+          this.errorMessage = 'Une erreur inattendue est survenue.';
+        },
       });
   }
 
   ngOnDestroy(): void {
     window.removeEventListener('resize', this.updateChartSize.bind(this));
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private updateChartSize(): void {
@@ -75,7 +92,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSelect(event: any): void {
+  onSelect(event: { name: string }): void {
     if (event && event.name) {
       const selectedCountry = this.medalsData.find(
         (country) => country.name === event.name
@@ -85,7 +102,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
     }
   }
-  getTooltipText(data: any): string {
+  getTooltipText(data: { data: MedalData; value: number }): string {
     return `
       <div class="tooltip-content">
         <span class="tooltip-country">${data.data.name}:</span>

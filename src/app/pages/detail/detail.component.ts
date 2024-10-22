@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable, of, EMPTY } from 'rxjs';
 import { switchMap, catchError, map } from 'rxjs/operators';
 import { Olympic } from 'src/app/core/models/Olympic';
 import { OlympicService } from 'src/app/core/services/olympic.service';
@@ -12,21 +12,31 @@ import { OlympicService } from 'src/app/core/services/olympic.service';
 })
 export class DetailComponent implements OnInit {
   country$: Observable<Olympic | undefined>;
-  medalsData: any[] = [];
+  medalsData: { name: string; series: { name: string; value: number }[] }[] =
+    [];
+  errorMessage: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private olympicService: OlympicService
   ) {
-    this.country$ = this.route.paramMap.pipe(
+    this.country$ = this.olympicService.loadInitialData().pipe(
+      switchMap(() => this.route.paramMap),
       switchMap((params) => {
         const id = Number(params.get('id'));
+        if (isNaN(id)) {
+          throw new Error('ID invalide');
+        }
         return this.olympicService.getOlympicsByCountry(id);
       }),
-      catchError(() => {
-        this.router.navigate(['/']);
-        return of(undefined);
+      catchError((error) => {
+        console.error(
+          'Erreur lors de la récupération des données du pays:',
+          error
+        );
+        this.router.navigate(['/not-found']);
+        return EMPTY;
       })
     );
   }
@@ -39,22 +49,34 @@ export class DetailComponent implements OnInit {
     this.country$
       .pipe(
         map((country) => {
-          if (country) {
-            return [
-              {
-                name: country.country,
-                series: country.participations.map((p) => ({
-                  name: p.year.toString(),
-                  value: p.medalsCount,
-                })),
-              },
-            ];
+          if (!country) {
+            throw new Error('Pays non trouvé');
           }
-          return [];
+          return [
+            {
+              name: country.country,
+              series: country.participations.map((p) => ({
+                name: p.year.toString(),
+                value: p.medalsCount,
+              })),
+            },
+          ];
+        }),
+        catchError((error) => {
+          console.error('Erreur lors du chargement des données:', error);
+          this.errorMessage =
+            'Une erreur est survenue lors du chargement des données.';
+          return of([]);
         })
       )
-      .subscribe((data) => {
-        this.medalsData = data;
+      .subscribe({
+        next: (data) => {
+          this.medalsData = data;
+        },
+        error: (error) => {
+          console.error('Erreur de souscription:', error);
+          this.errorMessage = 'Une erreur inattendue est survenue.';
+        },
       });
   }
 
