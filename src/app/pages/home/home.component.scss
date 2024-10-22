@@ -1,0 +1,127 @@
+.dashboard {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  max-width: 100%;
+}
+
+h1,
+h2 {
+  color: #333;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+* {
+  box-sizing: inherit;
+}
+
+.subtitle-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.subtitle {
+  font-size: 24px;
+  font-weight: 400;
+  color: white;
+  background-color: #007d87;
+  padding: 10px 20px;
+  border-radius: 10px;
+  text-align: center;
+  display: inline-block;
+}
+
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 20px;
+}
+
+.stat-box {
+  background-color: #fff;
+  border: 1px solid #007d87;
+  border-radius: 10px;
+  padding: 5px 15px;
+  text-align: center;
+}
+
+.stat-box h3 {
+  margin: 5px;
+  font-size: 16px;
+  font-weight: normal;
+  color: #555555;
+  margin-bottom: 10px;
+}
+
+.stat-box p {
+  font-size: 24px;
+  font-weight: bold;
+  color: black;
+  margin: 0;
+}
+
+.chart-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  width: 100%;
+}
+
+::ng-deep .ngx-charts-tooltip-content.type-tooltip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  background-color: #2d909f !important;
+  color: white !important;
+  .tooltip-caret.position-top {
+    //la couleur du triangle sur le tooltip
+    color: white !important;
+    border-top: 7px solid #2d909f !important;
+  }
+}
+
+::ng-deep .ngx-charts-tooltip-content {
+  .tooltip-content {
+    padding: 5px;
+    font-size: 16px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .tooltip-country {
+      margin-bottom: 5px;
+    }
+
+    .tooltip-value {
+      display: flex;
+      align-items: center;
+
+      i {
+        margin-right: 5px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .view {
+    width: 100% !important;
+    height: auto !important;
+  }
+}
